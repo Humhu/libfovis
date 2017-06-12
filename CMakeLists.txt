@@ -10,7 +10,7 @@ include_directories(${EIGEN_INCLUDE_DIRS})
 add_definitions(${EIGEN_DEFINITIONS})
 
 catkin_package(
-  INCLUDE_DIRS libfovis
+  INCLUDE_DIRS .
   LIBRARIES fovis
 )
 

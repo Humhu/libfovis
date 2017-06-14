@@ -34,7 +34,8 @@ StereoDepth::StereoDepth(const StereoCalibration* calib,
   const VisualOdometryOptions& defaults(VisualOdometry::getDefaultOptions());
 
   _feature_window_size = optionsGetIntOrFromDefault(_options, "feature-window-size", defaults);
-  _num_pyramid_levels = optionsGetIntOrFromDefault(_options, "max-pyramid-level", defaults);
+  // NOTE max-pyramid-level can be zero!!!
+  _num_pyramid_levels = optionsGetIntOrFromDefault(_options, "max-pyramid-level", defaults) + 1;
   _fast_threshold = optionsGetIntOrFromDefault(_options, "fast-threshold", defaults);
   _use_adaptive_threshold = optionsGetBoolOrFromDefault(_options, "use-adaptive-threshold", defaults);
   _max_refinement_displacement = optionsGetDoubleOrFromDefault(_options, "stereo-max-refinement-displacement", defaults);

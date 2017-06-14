@@ -74,7 +74,8 @@ VisualOdometry::VisualOdometry(const Rectification* rectification,
 
   // extract options
   _feature_window_size = optionsGetIntOrFromDefault(_options, "feature-window-size", defaults);
-  _num_pyramid_levels = optionsGetIntOrFromDefault(_options, "max-pyramid-level", defaults);
+  // Max pyramid levels can be zero!!!
+  _num_pyramid_levels = optionsGetIntOrFromDefault(_options, "max-pyramid-level", defaults) + 1;
   _target_pixels_per_feature = optionsGetIntOrFromDefault(_options, "target-pixels-per-feature", defaults);
   _ref_frame_change_threshold = optionsGetIntOrFromDefault(_options, "ref-frame-change-threshold", defaults);
   _use_homography_initialization = optionsGetBoolOrFromDefault(_options, "use-homography-initialization", defaults);

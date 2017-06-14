@@ -37,7 +37,8 @@ OdometryFrame::OdometryFrame(const Rectification* rectification,
 
 
   const VisualOdometryOptions& defaults(VisualOdometry::getDefaultOptions());
-  _num_levels = optionsGetIntOrFromDefault(options, "max-pyramid-level", defaults);
+  // NOTE max-pyramid-level can be zero!!!
+  _num_levels = optionsGetIntOrFromDefault(options, "max-pyramid-level", defaults) + 1;
   _feature_window_size = optionsGetIntOrFromDefault(options, "feature-window-size", defaults);
   _use_image_normalization = optionsGetBoolOrFromDefault(options, "use-image-normalization", defaults);
 

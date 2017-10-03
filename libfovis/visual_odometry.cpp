@@ -69,6 +69,7 @@ VisualOdometry::VisualOdometry(const Rectification* rectification,
   _frame_count = 0;
 
   // check for any unrecognized options
+
   setOptions(options);
 
   _fast_threshold_min = 5;

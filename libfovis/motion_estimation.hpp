@@ -40,6 +40,8 @@ class MotionEstimator
     MotionEstimator(const Rectification* rectification, const VisualOdometryOptions& options);
     ~MotionEstimator();
 
+	void setOptions( const VisualOdometryOptions& options );
+
     void estimateMotion(OdometryFrame* reference_frame,
                         OdometryFrame* target_frame,
                         DepthSource* depth_source,

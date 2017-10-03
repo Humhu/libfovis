@@ -58,6 +58,11 @@ MotionEstimator::MotionEstimator(const Rectification* rectification,
   _num_frames = 0;
 
   // extract options
+  setOptions( options );
+}
+
+void MotionEstimator::setOptions( const VisualOdometryOptions& options )
+{
   VisualOdometryOptions defaults = VisualOdometry::getDefaultOptions();
   _inlier_max_reprojection_error = optionsGetDoubleOrFromDefault(options, "inlier-max-reprojection-error", defaults);
   _clique_inlier_threshold = optionsGetDoubleOrFromDefault(options, "clique-inlier-threshold", defaults);
@@ -66,7 +71,6 @@ MotionEstimator::MotionEstimator(const Rectification* rectification,
   _use_subpixel_refinement = optionsGetBoolOrFromDefault(options, "use-subpixel-refinement", defaults);
   _max_feature_motion = optionsGetDoubleOrFromDefault(options, "feature-search-window", defaults);
   _update_target_features_with_refined = _use_subpixel_refinement && optionsGetBoolOrFromDefault(options, "update-target-features-with-refined", defaults);
-
 }
 
 MotionEstimator::~MotionEstimator()

@@ -69,18 +69,7 @@ VisualOdometry::VisualOdometry(const Rectification* rectification,
   _frame_count = 0;
 
   // check for any unrecognized options
-  const VisualOdometryOptions& defaults = getDefaultOptions();
-  validateOptions(options, defaults);
-
-  // extract options
-  _feature_window_size = optionsGetIntOrFromDefault(_options, "feature-window-size", defaults);
-  _num_pyramid_levels = optionsGetIntOrFromDefault(_options, "max-pyramid-level", defaults);
-  _target_pixels_per_feature = optionsGetIntOrFromDefault(_options, "target-pixels-per-feature", defaults);
-  _ref_frame_change_threshold = optionsGetIntOrFromDefault(_options, "ref-frame-change-threshold", defaults);
-  _use_homography_initialization = optionsGetBoolOrFromDefault(_options, "use-homography-initialization", defaults);
-  _fast_threshold = optionsGetIntOrFromDefault(_options, "fast-threshold", defaults);
-  _use_adaptive_threshold = optionsGetBoolOrFromDefault(_options, "use-adaptive-threshold", defaults);
-  _fast_threshold_adaptive_gain = optionsGetDoubleOrFromDefault(_options, "fast-threshold-adaptive-gain", defaults);
+  setOptions(options);
 
   _fast_threshold_min = 5;
   _fast_threshold_max = 70;
@@ -102,6 +91,25 @@ VisualOdometry::VisualOdometry(const Rectification* rectification,
   _cur_frame = new OdometryFrame(_rectification, options);
 
   _estimator = new MotionEstimator(_rectification, _options);
+}
+
+void VisualOdometry::setOptions( const VisualOdometryOptions& options )
+{
+    const VisualOdometryOptions& defaults = getDefaultOptions();	
+	validateOptions(options, defaults);
+	_feature_window_size = optionsGetIntOrFromDefault(options, "feature-window-size", defaults);
+	_num_pyramid_levels = optionsGetIntOrFromDefault(options, "max-pyramid-level", defaults);
+	_target_pixels_per_feature = optionsGetIntOrFromDefault(options, "target-pixels-per-feature", defaults);
+	_ref_frame_change_threshold = optionsGetIntOrFromDefault(options, "ref-frame-change-threshold", defaults);
+	_use_homography_initialization = optionsGetBoolOrFromDefault(options, "use-homography-initialization", defaults);
+	_fast_threshold = optionsGetIntOrFromDefault(options, "fast-threshold", defaults);
+	_use_adaptive_threshold = optionsGetBoolOrFromDefault(options, "use-adaptive-threshold", defaults);
+	_fast_threshold_adaptive_gain = optionsGetDoubleOrFromDefault(options, "fast-threshold-adaptive-gain", defaults);
+
+	// pass options down
+	_estimator->setOptions( options );
+
+	_options = options;
 }
 
 VisualOdometry::~VisualOdometry()

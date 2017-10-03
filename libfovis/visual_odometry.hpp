@@ -181,6 +181,8 @@ class VisualOdometry
       return _options;
     }
 
+	void setOptions( const VisualOdometryOptions& options );
+
     /**
      * \return a reasonable set of default options that can be passed in to the
      * constructor if you don't know or care about the options.

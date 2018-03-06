@@ -69,9 +69,6 @@ VisualOdometry::VisualOdometry(const Rectification* rectification,
   _frame_count = 0;
 
   // check for any unrecognized options
-
-  setOptions(options);
-
   _fast_threshold_min = 5;
   _fast_threshold_max = 70;
 
@@ -92,6 +89,8 @@ VisualOdometry::VisualOdometry(const Rectification* rectification,
   _cur_frame = new OdometryFrame(_rectification, options);
 
   _estimator = new MotionEstimator(_rectification, _options);
+  
+  setOptions(options);
 }
 
 void VisualOdometry::setOptions( const VisualOdometryOptions& options )

@@ -36,11 +36,10 @@ const char* MotionEstimateStatusCodeStrings[] = {
   "REPROJECTION_ERROR"
 };
 
-MotionEstimator::MotionEstimator(const Rectification* rectification,
+MotionEstimator::MotionEstimator(const Rectification& rectification,
     const VisualOdometryOptions& options)
+: _rectification( rectification )
 {
-  _rectification = rectification;
-
   _ref_frame = NULL;
   _target_frame = NULL;
 
@@ -257,7 +256,7 @@ void MotionEstimator::matchFeatures(PyramidLevel& ref_level, PyramidLevel& targe
 {
   // get the camera projection matrix
   Eigen::Matrix<double, 3, 4> xyz_c_to_uvw_c =
-    _rectification->getRectifiedCameraParameters().toProjectionMatrix();
+    _rectification.getRectifiedCameraParameters().toProjectionMatrix();
   // get the ref_to_target isometry cuz of order of loops
   Eigen::Isometry3d ref_to_target = _motion_estimate->inverse();
   Eigen::Matrix<double, 3, 4> reproj_mat = xyz_c_to_uvw_c * ref_to_target.matrix();
@@ -320,7 +319,7 @@ void MotionEstimator::matchFeatures(PyramidLevel& ref_level, PyramidLevel& targe
         match.refined_target_keypoint.kp.v = final_target_uv(1);
         match.refined_target_keypoint.base_uv =
           final_target_uv * (1 << target_kpdata->pyramid_level);
-        _rectification->rectifyBilinearLookup(match.refined_target_keypoint.base_uv,
+        _rectification.rectifyBilinearLookup(match.refined_target_keypoint.base_uv,
             &match.refined_target_keypoint.rect_base_uv);
         match.status = MATCH_NEEDS_DEPTH_REFINEMENT;
       }
@@ -405,7 +404,7 @@ void MotionEstimator::computeMaximallyConsistentClique()
   double baseline = _depth_source->getBaseline();
   bool have_baseline = baseline > 0;
   // XXX this is not actually correct for kinect/primesense
-  const CameraIntrinsicsParameters& rparams = _rectification->getRectifiedCameraParameters();
+  const CameraIntrinsicsParameters& rparams = _rectification.getRectifiedCameraParameters();
   double stereo_focal_length = rparams.fx;
 #endif
 
@@ -587,7 +586,7 @@ void MotionEstimator::refineMotionEstimate()
     i++;
   }
 
-  const CameraIntrinsicsParameters& rparams = _rectification->getRectifiedCameraParameters();
+  const CameraIntrinsicsParameters& rparams = _rectification.getRectifiedCameraParameters();
 
   // refine motion estimate by minimizing bidirectional reprojection error.
   // bidirectional reprojection error is the error of the target features
@@ -621,7 +620,7 @@ void MotionEstimator::refineMotionEstimate()
     i++;
   }
 
-  const CameraIntrinsicsParameters& rparams = _rectification->getRectifiedCameraParameters();
+  const CameraIntrinsicsParameters& rparams = _rectification.getRectifiedCameraParameters();
   // refine motion estimate by minimizing reprojection error of the
   // target features projected into the reference image.
   *_motion_estimate = refineMotionEstimate(target_xyz,
@@ -640,7 +639,7 @@ void MotionEstimator::computeReprojectionError()
     return;
 
   Eigen::Matrix<double, 3, 4> proj_matrix =
-    _rectification->getRectifiedCameraParameters().toProjectionMatrix();
+    _rectification.getRectifiedCameraParameters().toProjectionMatrix();
   Eigen::Matrix<double, 3, 4> reproj_matrix =
       proj_matrix * _motion_estimate->matrix();
 

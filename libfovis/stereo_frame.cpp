@@ -26,9 +26,9 @@ keypoint_rect_v_comparator( const KeypointData& a,
 }
 
 StereoFrame::StereoFrame( int width, int height,
-                          const Rectification* rectify_map,
+                          const Rectification& rectify_map,
                           const VisualOdometryOptions& options )
-	: _base_width( width ), _base_height( height )
+: _base_width( width ), _base_height( height ), _rectify_map(rectify_map)
 {
 	const VisualOdometryOptions& defaults( VisualOdometry::getDefaultOptions() );
 
@@ -42,14 +42,12 @@ StereoFrame::StereoFrame( int width, int height,
 	int bucket_height = optionsGetIntOrFromDefault( options, "bucket-height", defaults );
 	int max_keypoints_per_bucket = optionsGetIntOrFromDefault( options, "max-keypoints-per-bucket", defaults );
 
-	_rectify_map = rectify_map->makeCopy();
 	initialize( bucket_width, bucket_height, max_keypoints_per_bucket );
 }
 
 StereoFrame::~StereoFrame()
 {
 	_levels.clear();
-	delete _rectify_map;
 }
 
 void
@@ -139,7 +137,7 @@ StereoFrame::prepareFrame( const uint8_t* raw_gray, int fast_threshold )
 			kpdata.base_uv( 1 ) = kp_cand.v * (1 << level_num);
 			// lookup rectified pixel coordinates
 			int pixel_index = (int) (kpdata.base_uv( 1 ) * _base_width + kpdata.base_uv( 0 ) );
-			_rectify_map->rectifyLookupByIndex( pixel_index, &kpdata.rect_base_uv );
+			_rectify_map.rectifyLookupByIndex( pixel_index, &kpdata.rect_base_uv );
 			if( kpdata.rect_base_uv( 0 ) < 0 || kpdata.rect_base_uv( 0 ) >= _base_width ||
 			    kpdata.rect_base_uv( 1 ) < 0 || kpdata.rect_base_uv( 1 ) >= _base_height ) {
 				continue;

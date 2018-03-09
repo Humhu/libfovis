@@ -41,7 +41,7 @@ class MotionEstimator
 
     typedef std::shared_ptr<MotionEstimator> Ptr;
 
-    MotionEstimator(const Rectification* rectification, const VisualOdometryOptions& options);
+    MotionEstimator(const Rectification& rectification, const VisualOdometryOptions& options);
     ~MotionEstimator();
 
 	void setOptions( const VisualOdometryOptions& options );
@@ -122,7 +122,7 @@ class MotionEstimator
     // how many feature matches failed the reprojection test
     int _num_reprojection_failures;
 
-    const Rectification* _rectification;
+    const Rectification& _rectification;
 
     OdometryFrame::Ptr _ref_frame;
     OdometryFrame::Ptr _target_frame;

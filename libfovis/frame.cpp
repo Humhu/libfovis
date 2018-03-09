@@ -27,11 +27,11 @@ using namespace std;
 namespace fovis
 {
 
-OdometryFrame::OdometryFrame(const Rectification* rectification,
+OdometryFrame::OdometryFrame(const Rectification& rectification,
                              const VisualOdometryOptions& options)
+: _rectification( rectification )
 {
-  const CameraIntrinsicsParameters& input_camera = rectification->getInputCameraParameters();
-  _rectification = rectification;
+  const CameraIntrinsicsParameters& input_camera = rectification.getInputCameraParameters();
   _orig_width = input_camera.width;
   _orig_height = input_camera.height;
 
@@ -153,7 +153,7 @@ OdometryFrame::prepareFrame(const uint8_t* raw_gray,
 
       // lookup rectified pixel coordinates
       int pixel_index = static_cast<int>(kpdata.base_uv(1) * _orig_width + kpdata.base_uv(0));
-      _rectification->rectifyLookupByIndex(pixel_index, &kpdata.rect_base_uv);
+      _rectification.rectifyLookupByIndex(pixel_index, &kpdata.rect_base_uv);
 
       // Ignore the points that fall
       // outside the original image region when undistorted.

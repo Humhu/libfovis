@@ -21,7 +21,7 @@
 namespace fovis
 {
 
-StereoDepth::StereoDepth(const StereoCalibration* calib,
+StereoDepth::StereoDepth(const StereoCalibration::Ptr& calib,
                          const VisualOdometryOptions& options) :
     _calib(calib),
     _width(calib->getWidth()),

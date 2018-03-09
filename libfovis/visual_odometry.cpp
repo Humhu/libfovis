@@ -54,9 +54,9 @@ static void validateOptions(const VisualOdometryOptions& options,
 
 // =================== VisualOdometry ===================
 
-VisualOdometry::VisualOdometry(const Rectification* rectification,
+VisualOdometry::VisualOdometry(const Rectification::Ptr& rectification,
                                const VisualOdometryOptions& options) :
-    _options(options)
+    _options(options), _rectification(rectification)
 {
   _ref_frame = NULL;
   _prev_frame = NULL;
@@ -80,15 +80,13 @@ VisualOdometry::VisualOdometry(const Rectification* rectification,
 
   _p->ref_to_prev_frame.setIdentity();
 
-  _rectification = rectification;
+  _ref_frame = std::make_shared<OdometryFrame>(*_rectification, options);
 
-  _ref_frame = std::make_shared<OdometryFrame>(_rectification, options);
+  _prev_frame = std::make_shared<OdometryFrame>(*_rectification, options);
 
-  _prev_frame = std::make_shared<OdometryFrame>(_rectification, options);
+  _cur_frame = std::make_shared<OdometryFrame>(*_rectification, options);
 
-  _cur_frame = std::make_shared<OdometryFrame>(_rectification, options);
-
-  _estimator = std::make_shared<MotionEstimator>(_rectification, _options);
+  _estimator = std::make_shared<MotionEstimator>(*_rectification, _options);
   
   setOptions(options);
 }

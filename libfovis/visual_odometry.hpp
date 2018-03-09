@@ -75,7 +75,7 @@ class VisualOdometry
      * \param options controls the behavior of the estimation algorithms.  This
      * is specified as a key/value dictionary.
      */
-    VisualOdometry(const Rectification* rectification,
+    VisualOdometry(const Rectification::Ptr& rectification,
                    const VisualOdometryOptions& options);
 
     ~VisualOdometry();
@@ -204,7 +204,7 @@ class VisualOdometry
                                                &init_motion_estimate =
                                                Eigen::Isometry3d::Identity());
 
-    const Rectification* _rectification;
+    const Rectification::Ptr _rectification;
 
     OdometryFrame::Ptr _ref_frame;
     OdometryFrame::Ptr _prev_frame;

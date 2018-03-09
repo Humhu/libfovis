@@ -25,7 +25,7 @@ class StereoFrame
 {
   public:
     StereoFrame(int width, int height,
-                const Rectification* rectify_map,
+                const Rectification& rectify_map,
                 const VisualOdometryOptions& options);
 
     ~StereoFrame();
@@ -42,7 +42,7 @@ class StereoFrame
     PyramidLevel::Ptr& getLevel(int level_num) { return _levels[level_num]; }
 
     void rectify(Eigen::Vector2d xy_in, Eigen::Vector2d * out) {
-      _rectify_map->rectifyBilinearLookup(xy_in, out);
+      _rectify_map.rectifyBilinearLookup(xy_in, out);
     }
 
   private:
@@ -55,7 +55,7 @@ class StereoFrame
     int _num_levels;
     std::vector<PyramidLevel::Ptr> _levels;
 
-    Rectification* _rectify_map;
+    const Rectification& _rectify_map;
 
     bool _use_bucketing;
     bool _use_image_normalization;

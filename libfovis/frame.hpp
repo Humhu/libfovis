@@ -37,7 +37,7 @@ class OdometryFrame
 
     typedef std::shared_ptr<OdometryFrame> Ptr;
 
-    OdometryFrame(const Rectification* rectification,
+    OdometryFrame(const Rectification& rectification,
                   const VisualOdometryOptions& options);
 
     ~OdometryFrame();
@@ -89,7 +89,7 @@ class OdometryFrame
     bool _use_image_normalization;
 
     // note: the rectification pointer is 'borrowed'
-    const Rectification* _rectification;
+    const Rectification& _rectification;
 
     std::vector<PyramidLevel::Ptr> _levels;
 };

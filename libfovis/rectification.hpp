@@ -2,6 +2,7 @@
 #define __fovis_rectification_hpp__
 
 #include <inttypes.h>
+#include <memory>
 
 #include <Eigen/Core>
 
@@ -42,6 +43,8 @@ class Rectification
 {
   public:
 
+    typedef std::shared_ptr<Rectification> Ptr;
+
     /**
      * Convenience constructor to create a Rectification object that simply
      * undistorts.  The rotation is set to identity, and the rectified camera
@@ -57,6 +60,8 @@ class Rectification
     Rectification(const CameraIntrinsicsParameters& input_camera_params,
             const Eigen::Matrix3d& rotation,
             const CameraIntrinsicsParameters& rectified_camera_params);
+
+    Rectification(const Rectification& other );
 
     ~Rectification();
 
@@ -157,11 +162,6 @@ class Rectification
         rect_uv->y() += w[i] * _map_y[neighbor_indices[i]];
       }
     }
-
-    /**
-     * \return a deep copy of this object.
-     */
-    Rectification* makeCopy() const;
 
   private:
     Rectification() {}

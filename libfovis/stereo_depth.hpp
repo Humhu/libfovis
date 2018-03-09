@@ -24,7 +24,7 @@ namespace fovis
 class StereoDepth : public DepthSource
 {
   public:
-    StereoDepth(const StereoCalibration* calib,
+    StereoDepth(const StereoCalibration::Ptr& calib,
                 const VisualOdometryOptions& options);
 
     ~StereoDepth();
@@ -48,7 +48,7 @@ class StereoDepth : public DepthSource
                         PyramidLevel& right_level,
                         Points2d* matched_right_keypoints);
 
-    const StereoCalibration* _calib;
+    const StereoCalibration::Ptr _calib;
 
     int _width;
     int _height;

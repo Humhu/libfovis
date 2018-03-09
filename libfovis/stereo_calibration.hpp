@@ -2,6 +2,7 @@
 #define __fovis_stereo_calibration_hpp__
 
 #include <inttypes.h>
+#include <memory>
 
 #include "camera_intrinsics.hpp"
 #include "rectification.hpp"
@@ -42,8 +43,12 @@ struct StereoCalibrationParameters
 class StereoCalibration
 {
   public:
+
+    typedef std::shared_ptr<StereoCalibration> Ptr;
+
     StereoCalibration(const StereoCalibrationParameters& params);
-    ~StereoCalibration();
+
+    StereoCalibration( const StereoCalibration& other );
 
     /**
      * Compute the 4x4 transformation matrix mapping [ u, v, disparity, 1 ]
@@ -82,22 +87,17 @@ class StereoCalibration
       return -_parameters.right_to_left_translation[0];
     }
 
-    const Rectification* getLeftRectification() const {
-      return _left_rectification;
+    const Rectification& getLeftRectification() const {
+      return *_left_rectification;
     }
 
-    const Rectification* getRightRectification() const {
-      return _right_rectification;
+    const Rectification& getRightRectification() const {
+      return *_right_rectification;
     }
 
     const CameraIntrinsicsParameters& getRectifiedParameters() const {
       return _rectified_parameters;
     }
-
-    /**
-     * \return a newly allocated copy of this calibration object.
-     */
-    StereoCalibration* makeCopy() const;
 
   private:
     StereoCalibration() { }
@@ -105,8 +105,8 @@ class StereoCalibration
 
     StereoCalibrationParameters _parameters;
     CameraIntrinsicsParameters _rectified_parameters;
-    Rectification* _left_rectification;
-    Rectification* _right_rectification;
+    Rectification::Ptr _left_rectification;
+    Rectification::Ptr _right_rectification;
 };
 
 }

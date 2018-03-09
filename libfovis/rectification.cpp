@@ -90,6 +90,18 @@ Rectification::populateMap()
   }
 }
 
+Rectification::Rectification( const Rectification& other )
+{
+  _input_camera = other._input_camera;
+  _rotation = new Eigen::Matrix3d(*other._rotation);
+  _rectified_camera = other._rectified_camera;
+  int num_elem = other._input_camera.width * other._input_camera.height;
+  _map_x = new float[num_elem];
+  _map_y = new float[num_elem];
+  std::copy(other._map_x, other._map_x+num_elem, _map_x);
+  std::copy(other._map_y, other._map_y+num_elem, _map_y);
+}
+
 Rectification::~Rectification()
 {
   delete[] _map_x;
@@ -97,21 +109,6 @@ Rectification::~Rectification()
   delete _rotation;
   _map_x = NULL;
   _map_y = NULL;
-}
-
-Rectification*
-Rectification::makeCopy() const
-{
-  Rectification* result = new Rectification();
-  result->_input_camera = _input_camera;
-  result->_rotation = new Eigen::Matrix3d(*_rotation);
-  result->_rectified_camera = _rectified_camera;
-  int num_elem = _input_camera.width * _input_camera.height;
-  result->_map_x = new float[num_elem];
-  result->_map_y = new float[num_elem];
-  std::copy(_map_x, _map_x+num_elem, result->_map_x);
-  std::copy(_map_y, _map_y+num_elem, result->_map_y);
-  return result;
 }
 
 #if 0

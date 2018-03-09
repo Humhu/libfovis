@@ -20,7 +20,7 @@ DataCapture::DataCapture()
   rgb_params.cx = width / 2.0;
   rgb_params.cy = height / 2.0;
 
-  depth_image = new fovis::DepthImage(rgb_params, width, height);
+  depth_image = std::make_shared<fovis::DepthImage>(rgb_params, width, height);
   depth_data = new float[width * height];
   gray_buf = new uint8_t[width * height];
 

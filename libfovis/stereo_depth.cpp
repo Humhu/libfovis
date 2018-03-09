@@ -80,28 +80,28 @@ StereoDepth::setRightImage(const uint8_t * img)
 }
 
 void
-StereoDepth::leftRightMatch(PyramidLevel *left_level,
-                            PyramidLevel *right_level,
+StereoDepth::leftRightMatch(PyramidLevel& left_level,
+                            PyramidLevel& right_level,
                             Points2d* matched_right_keypoints)
 {
   tictoc("leftRightMatch");
 
   matched_right_keypoints->clear();
 
-  int num_kp_left = left_level->getNumKeypoints();
-  int num_kp_right = right_level->getNumKeypoints();
-  int level_num = left_level->getLevelNum();
+  int num_kp_left = left_level.getNumKeypoints();
+  int num_kp_right = right_level.getNumKeypoints();
+  int level_num = left_level.getLevelNum();
 
   float adj_max_dist_epipolar_line = _max_dist_epipolar_line*(1 << level_num);
 
-  //assert (left_level->getNumLevel() == right_level->getNumLevel());
+  //assert (left_level.getNumLevel() == right_level.getNumLevel());
   _legal_matches.resize(num_kp_left);
   for (int left_kp_ind = 0; left_kp_ind < num_kp_left; ++left_kp_ind) {
-    Eigen::Vector2d ref_rect_base_uv = left_level->getKeypointRectBaseUV(left_kp_ind);
+    Eigen::Vector2d ref_rect_base_uv = left_level.getKeypointRectBaseUV(left_kp_ind);
     std::vector<int>& left_candidates(_legal_matches[left_kp_ind]);
     left_candidates.clear();
     for (int right_kp_ind=0; right_kp_ind < num_kp_right; ++right_kp_ind) {
-      Eigen::Vector2d diff = ref_rect_base_uv - right_level->getKeypointRectBaseUV(right_kp_ind);
+      Eigen::Vector2d diff = ref_rect_base_uv - right_level.getKeypointRectBaseUV(right_kp_ind);
       // TODO some sort of binary search
       if (diff(1) < -adj_max_dist_epipolar_line) { break; }
       // epipolar and disparity constraints
@@ -182,21 +182,21 @@ StereoDepth::haveXyz(int u, int v)
 }
 
 void
-StereoDepth::getXyz(OdometryFrame * odom_frame)
+StereoDepth::getXyz(OdometryFrame& odom_frame)
 {
-  int num_levels = odom_frame->getNumLevels();
+  int num_levels = odom_frame.getNumLevels();
   for(int level_num=0; level_num < num_levels; ++level_num) {
-    PyramidLevel* left = odom_frame->getLevel(level_num);
-    PyramidLevel* right = _right_frame->getLevel(level_num);
+    PyramidLevel::Ptr& left = odom_frame.getLevel(level_num);
+    PyramidLevel::Ptr& right = _right_frame->getLevel(level_num);
     Points2d* matched_right_keypoints(&_matched_right_keypoints_per_level.at(level_num));
-    leftRightMatch(left, right, matched_right_keypoints);
+    leftRightMatch(*left, *right, matched_right_keypoints);
   }
 }
 
 void
 StereoDepth::refineXyz(FeatureMatch * matches,
                        int num_matches,
-                       OdometryFrame * odom_frame)
+                       OdometryFrame& odom_frame)
 {
   for (int m_ind = 0; m_ind < num_matches; ++m_ind) {
     FeatureMatch& match = matches[m_ind];
@@ -217,12 +217,12 @@ StereoDepth::refineXyz(FeatureMatch * matches,
     Eigen::Vector2d right_uv(_matched_right_keypoints_per_level[level_num][kp_ind].first,
                              _matched_right_keypoints_per_level[level_num][kp_ind].second);
 
-    PyramidLevel* left_level = odom_frame->getLevel(level_num);
-    PyramidLevel* right_level = _right_frame->getLevel(level_num);
+    PyramidLevel::Ptr& left_level = odom_frame.getLevel(level_num);
+    PyramidLevel::Ptr& right_level = _right_frame->getLevel(level_num);
 
     Eigen::Vector2d refined_right_uv;
     float delta_sse;
-    refineFeatureMatch(left_level, right_level, left_uv, right_uv,
+    refineFeatureMatch(*left_level, *right_level, left_uv, right_uv,
                        &refined_right_uv, &delta_sse);
 
     double ds = (right_uv - refined_right_uv).norm();

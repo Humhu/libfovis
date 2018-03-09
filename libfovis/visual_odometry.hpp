@@ -110,14 +110,14 @@ class VisualOdometry
      * reference frame will not change as long as new input frames are easily
      * matched to it.
      */
-    const OdometryFrame* getReferenceFrame() const {
+    const OdometryFrame::Ptr& getReferenceFrame() const {
       return _ref_frame;
     }
 
     /**
      * Retrieve the current target frame used for motion estimation.
      */
-    const OdometryFrame* getTargetFrame() const {
+    const OdometryFrame::Ptr& getTargetFrame() const {
       return _cur_frame;
     }
 
@@ -156,7 +156,7 @@ class VisualOdometry
     /**
      * \return the \ref MotionEstimator object used internally.
      */
-    const MotionEstimator* getMotionEstimator() const {
+    const MotionEstimator::Ptr& getMotionEstimator() const {
       return _estimator;
     }
 
@@ -198,19 +198,19 @@ class VisualOdometry
   private:
     void prepareFrame(OdometryFrame* frame);
 
-    Eigen::Quaterniond estimateInitialRotation(const OdometryFrame* prev,
-                                               const OdometryFrame* cur,
+    Eigen::Quaterniond estimateInitialRotation(const OdometryFrame& prev,
+                                               const OdometryFrame& cur,
                                                const Eigen::Isometry3d
                                                &init_motion_estimate =
                                                Eigen::Isometry3d::Identity());
 
     const Rectification* _rectification;
 
-    OdometryFrame* _ref_frame;
-    OdometryFrame* _prev_frame;
-    OdometryFrame* _cur_frame;
+    OdometryFrame::Ptr _ref_frame;
+    OdometryFrame::Ptr _prev_frame;
+    OdometryFrame::Ptr _cur_frame;
 
-    MotionEstimator* _estimator;
+    MotionEstimator::Ptr _estimator;
 
     VisualOdometryPriv* _p;
 

@@ -3,6 +3,7 @@ project(libfovis)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_CXX_FLAGS "-g -Wall -std=c++0x")
 
 find_package(catkin REQUIRED cmake_modules)
 
@@ -37,7 +38,6 @@ add_library(fovis
     libfovis/gauss_pyramid.c
     libfovis/refine_motion_estimate.cpp
     libfovis/tictoc.cpp
-    libfovis/primesense_depth.cpp
     libfovis/initial_homography_estimation.cpp
     libfovis/grid_filter.cpp
     libfovis/intensity_descriptor.cpp

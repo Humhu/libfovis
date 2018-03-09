@@ -38,14 +38,14 @@ FeatureMatcher::~FeatureMatcher()
 }
 
 void
-FeatureMatcher::matchFeatures(PyramidLevel* ref_level,
-                              PyramidLevel* target_level,
+FeatureMatcher::matchFeatures(PyramidLevel& ref_level,
+                              PyramidLevel& target_level,
                               const std::vector<std::vector<int> >& candidates,
                               FeatureMatch* matches,
                               int* num_matches)
 {
-  int num_ref_features = ref_level->getNumKeypoints();
-  int num_target_features = target_level->getNumKeypoints();
+  int num_ref_features = ref_level.getNumKeypoints();
+  int num_target_features = target_level.getNumKeypoints();
 
   // allocate more space for buffers if necessary
   if (num_ref_features > _ref_feature_capacity) {
@@ -61,8 +61,8 @@ FeatureMatcher::matchFeatures(PyramidLevel* ref_level,
     _target_feature_capacity = num_target_features;
   }
 
-  int descriptor_len = ref_level->getDescriptorLength();
-  assert(descriptor_len == target_level->getDescriptorLength());
+  int descriptor_len = ref_level.getDescriptorLength();
+  assert(descriptor_len == target_level.getDescriptorLength());
 
   SAD sad(descriptor_len);
 
@@ -85,7 +85,7 @@ FeatureMatcher::matchFeatures(PyramidLevel* ref_level,
   // Match score is defined as the sum of absolute differences between two feature
   // descriptors.  Lower scores (less difference) are better.
   for (int ref_ind = 0; ref_ind < num_ref_features; ref_ind++) {
-    const uint8_t * ref_desc = ref_level->getDescriptor(ref_ind);
+    const uint8_t * ref_desc = ref_level.getDescriptor(ref_ind);
 
     const std::vector<int>& ref_candidates(candidates[ref_ind]);
     for (std::vector<int>::const_iterator ref_candidates_itr = ref_candidates.begin(),
@@ -93,7 +93,7 @@ FeatureMatcher::matchFeatures(PyramidLevel* ref_level,
          ref_candidates_itr != ref_candidates_end;
          ++ref_candidates_itr) {
       int target_ind = *ref_candidates_itr;
-      const uint8_t * target_desc = target_level->getDescriptor(target_ind);
+      const uint8_t * target_desc = target_level.getDescriptor(target_ind);
 
       int score = sad.score(ref_desc, target_desc);
       assert(score <= worst_score);
@@ -116,15 +116,15 @@ FeatureMatcher::matchFeatures(PyramidLevel* ref_level,
     if (target_ind >= 0 &&
         _target_to_ref_indices[target_ind] == ref_ind) {
 
-      KeypointData* ref_kpdata = ref_level->getKeypointData(ref_ind);
-      KeypointData* target_kpdata = target_level->getKeypointData(target_ind);
+      KeypointData* ref_kpdata = ref_level.getKeypointData(ref_ind);
+      KeypointData* target_kpdata = target_level.getKeypointData(target_ind);
 
       assert(ref_kpdata->kp.u >= 0 && ref_kpdata->kp.v >= 0 &&
-             ref_kpdata->kp.u < ref_level->getWidth() &&
-             ref_kpdata->kp.v < ref_level->getHeight());
+             ref_kpdata->kp.u < ref_level.getWidth() &&
+             ref_kpdata->kp.v < ref_level.getHeight());
       assert(target_kpdata->kp.u >= 0 && target_kpdata->kp.v >= 0 &&
-             target_kpdata->kp.u < target_level->getWidth() &&
-             target_kpdata->kp.v < target_level->getHeight());
+             target_kpdata->kp.u < target_level.getWidth() &&
+             target_kpdata->kp.v < target_level.getHeight());
 
       FeatureMatch match(target_kpdata, ref_kpdata);
       match.status = MATCH_OK;

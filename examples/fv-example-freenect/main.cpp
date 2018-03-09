@@ -54,7 +54,7 @@ int main(int argc, char **argv)
   // them here in the "options" variable.
 
   // setup the visual odometry
-  fovis::VisualOdometry* odom = new fovis::VisualOdometry(&rect, options);
+  fovis::VisualOdometry::Ptr odom = std::make_shared<fovis::VisualOdometry>(&rect, options);
 
   // exit cleanly on CTL-C
   struct sigaction new_action;

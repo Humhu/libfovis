@@ -2,6 +2,7 @@
 #define __fovis_feature_match_hpp__
 
 #include <vector>
+#include <memory>
 
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
@@ -41,9 +42,14 @@ enum MatchStatusCode {
 class FeatureMatch
 {
   public:
+
+    
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   public:
+  
+    typedef std::shared_ptr<FeatureMatch> Ptr;
+
     /**
      * Initializes a NULL (and useless) feature match.
      */

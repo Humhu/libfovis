@@ -33,19 +33,19 @@ class StereoDepth : public DepthSource
 
     virtual bool haveXyz(int u, int v);
 
-    virtual void getXyz(OdometryFrame * frame);
+    virtual void getXyz(OdometryFrame& frame);
 
-    virtual void refineXyz(FeatureMatch * matches,
+    virtual void refineXyz(FeatureMatch* matches,
                            int num_matches,
-                           OdometryFrame * frame);
+                           OdometryFrame& frame);
 
     virtual double getBaseline() const { return _calib->getBaseline(); }
 
   private:
     typedef std::vector<std::pair<double, double> > Points2d;
 
-    void leftRightMatch(PyramidLevel* left_level,
-                        PyramidLevel* right_level,
+    void leftRightMatch(PyramidLevel& left_level,
+                        PyramidLevel& right_level,
                         Points2d* matched_right_keypoints);
 
     const StereoCalibration* _calib;

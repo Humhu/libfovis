@@ -75,10 +75,10 @@ PyramidLevel::increase_capacity(int new_capacity)
 
 PyramidLevel::~PyramidLevel()
 {
-  free(_raw_gray);
-  free(_descriptors);
-  free(_pyrbuf);
-  free(_keypoints);
+  free(_raw_gray); // This might actually be malloc'd
+  free(_descriptors); // Might actually be malloc'd too
+  free(_pyrbuf); // This is actually malloc'd
+  delete[] _keypoints;
   delete _descriptor_extractor;
   _raw_gray = NULL;
   _descriptors = NULL;

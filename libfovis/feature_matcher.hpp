@@ -2,6 +2,7 @@
 #define __fovis_feature_matcher_hpp__
 
 #include "feature_match.hpp"
+#include "pyramid_level.hpp"
 
 namespace fovis
 {
@@ -36,8 +37,8 @@ public:
    * \param num_matches output parameter, is set to the number of features
    * matched.
    */
-  void matchFeatures(PyramidLevel* ref_level,
-                     PyramidLevel* target_level,
+  void matchFeatures(PyramidLevel& ref_level,
+                     PyramidLevel& target_level,
                      const std::vector<std::vector<int> >& candidates,
                      FeatureMatch* matches,
                      int* num_matches);

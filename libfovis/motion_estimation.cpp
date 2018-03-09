@@ -89,8 +89,8 @@ MotionEstimator::~MotionEstimator()
 }
 
 void
-MotionEstimator::estimateMotion(OdometryFrame* ref_frame,
-                                OdometryFrame* target_frame,
+MotionEstimator::estimateMotion(OdometryFrame::Ptr& ref_frame,
+                                OdometryFrame::Ptr& target_frame,
                                 DepthSource* depth_source,
                                 const Eigen::Isometry3d &init_motion_est,
                                 const Eigen::MatrixXd &init_motion_cov)
@@ -117,12 +117,12 @@ MotionEstimator::estimateMotion(OdometryFrame* ref_frame,
 
   int num_levels = _ref_frame->getNumLevels();
   for (int level_ind = 0; level_ind < num_levels; level_ind++) {
-    PyramidLevel* ref_level = _ref_frame->getLevel(level_ind);
-    PyramidLevel* target_level = _target_frame->getLevel(level_ind);
-    matchFeatures(ref_level, target_level);
+    PyramidLevel::Ptr& ref_level = _ref_frame->getLevel(level_ind);
+    PyramidLevel::Ptr& target_level = _target_frame->getLevel(level_ind);
+    matchFeatures(*ref_level, *target_level);
   }
   if (_use_subpixel_refinement) {
-    depth_source->refineXyz(_matches, _num_matches, target_frame);
+    depth_source->refineXyz(_matches, _num_matches, *target_frame);
   }
   tictoc("matchFeatures_all_levels");
 
@@ -244,16 +244,16 @@ void MotionEstimator::sanityCheck() const
     const PyramidLevel * ref_level = _ref_frame->getLevel(ref_kp->pyramid_level);
     const PyramidLevel * target_level = _target_frame->getLevel(target_kp->pyramid_level);
     assert(ref_kp->kp.u >= 0 && ref_kp->kp.v >= 0 &&
-           ref_kp->kp.u < ref_level->getWidth() &&
-           ref_kp->kp.v < ref_level->getHeight());
+           ref_kp->kp.u < ref_level.getWidth() &&
+           ref_kp->kp.v < ref_level.getHeight());
     assert(target_kp->kp.u >= 0 && target_kp->kp.v >= 0 &&
-           target_kp->kp.u < target_level->getWidth() &&
-           target_kp->kp.v < target_level->getHeight());
+           target_kp->kp.u < target_level.getWidth() &&
+           target_kp->kp.v < target_level.getHeight());
   }
 #endif
 }
 
-void MotionEstimator::matchFeatures(PyramidLevel* ref_level, PyramidLevel* target_level)
+void MotionEstimator::matchFeatures(PyramidLevel& ref_level, PyramidLevel& target_level)
 {
   // get the camera projection matrix
   Eigen::Matrix<double, 3, 4> xyz_c_to_uvw_c =
@@ -261,24 +261,24 @@ void MotionEstimator::matchFeatures(PyramidLevel* ref_level, PyramidLevel* targe
   // get the ref_to_target isometry cuz of order of loops
   Eigen::Isometry3d ref_to_target = _motion_estimate->inverse();
   Eigen::Matrix<double, 3, 4> reproj_mat = xyz_c_to_uvw_c * ref_to_target.matrix();
-  int num_ref_features = ref_level->getNumKeypoints();
-  int num_target_features = target_level->getNumKeypoints();
+  int num_ref_features = ref_level.getNumKeypoints();
+  int num_target_features = target_level.getNumKeypoints();
 
   std::vector<std::vector<int> > candidates(num_ref_features);
   for (int ref_ind = 0; ref_ind < num_ref_features; ref_ind++) {
     // constrain the matching to a search-region based on the
     // current motion estimate
-    const Eigen::Vector4d& ref_xyzw = ref_level->getKeypointXYZW(ref_ind);
+    const Eigen::Vector4d& ref_xyzw = ref_level.getKeypointXYZW(ref_ind);
     assert(!isnan(ref_xyzw(0)) && !isnan(ref_xyzw(1)) &&
            !isnan(ref_xyzw(2)) && !isnan(ref_xyzw(3)));
     Eigen::Vector3d reproj_uv1 = reproj_mat * ref_xyzw;
     reproj_uv1 /= reproj_uv1(2);
-    Eigen::Vector2d ref_uv(ref_level->getKeypointRectBaseU(ref_ind),
-                           ref_level->getKeypointRectBaseV(ref_ind));
+    Eigen::Vector2d ref_uv(ref_level.getKeypointRectBaseU(ref_ind),
+                           ref_level.getKeypointRectBaseV(ref_ind));
     std::vector<int>& ref_candidates(candidates[ref_ind]);
     for (int target_ind = 0; target_ind < num_target_features; target_ind++) {
-      Eigen::Vector2d target_uv(target_level->getKeypointRectBaseU(target_ind),
-                                target_level->getKeypointRectBaseV(target_ind));
+      Eigen::Vector2d target_uv(target_level.getKeypointRectBaseU(target_ind),
+                                target_level.getKeypointRectBaseV(target_ind));
       //TODO: Should adapt based on covariance instead of constant sized window!
       //Eigen::Vector2d err = target_uv - ref_uv; //ignore motion est
       Eigen::Vector2d err = target_uv - reproj_uv1.head<2>();
@@ -548,7 +548,7 @@ void MotionEstimator::estimateRigidBodyTransform()
   }
 
 #ifdef USE_HORN_ABSOLUTE_ORIENTATION
-  if (0 != absolute_orientation_horn(target_xyz, ref_xyz, _motion_estimate)) {
+  if (0 != absolute_orientation_horn(target_xyz, ref_xyz, *_motion_estimate)) {
     _estimate_status = OPTIMIZATION_FAILURE;
     return;
   }

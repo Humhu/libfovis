@@ -2,6 +2,7 @@
 #define __fovis_pyramid_level_hpp__
 
 #include <vector>
+#include <memory>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
@@ -21,6 +22,9 @@ namespace fovis
 class PyramidLevel
 {
   public:
+
+    typedef std::shared_ptr<PyramidLevel> Ptr;
+
     PyramidLevel(int width, int height, int level_num, int feature_window_size,
                  GridKeyPointFilter& grid_filter);
     ~PyramidLevel();

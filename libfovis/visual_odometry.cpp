@@ -82,13 +82,13 @@ VisualOdometry::VisualOdometry(const Rectification* rectification,
 
   _rectification = rectification;
 
-  _ref_frame = new OdometryFrame(_rectification, options);
+  _ref_frame = std::make_shared<OdometryFrame>(_rectification, options);
 
-  _prev_frame = new OdometryFrame(_rectification, options);
+  _prev_frame = std::make_shared<OdometryFrame>(_rectification, options);
 
-  _cur_frame = new OdometryFrame(_rectification, options);
+  _cur_frame = std::make_shared<OdometryFrame>(_rectification, options);
 
-  _estimator = new MotionEstimator(_rectification, _options);
+  _estimator = std::make_shared<MotionEstimator>(_rectification, _options);
   
   setOptions(options);
 }
@@ -114,10 +114,6 @@ void VisualOdometry::setOptions( const VisualOdometryOptions& options )
 
 VisualOdometry::~VisualOdometry()
 {
-  delete _estimator;
-  delete _ref_frame;
-  delete _prev_frame;
-  delete _cur_frame;
   delete _p;
   _ref_frame = NULL;
   _prev_frame = NULL;
@@ -129,14 +125,14 @@ VisualOdometry::~VisualOdometry()
 // a template image (the previous image) with the current image.  From this
 // homography, extract initial rotation parameters.
 Eigen::Quaterniond
-VisualOdometry::estimateInitialRotation(const OdometryFrame* prev, const OdometryFrame* cur,
+VisualOdometry::estimateInitialRotation(const OdometryFrame& prev, const OdometryFrame& cur,
     const Eigen::Isometry3d &init_motion_estimate)
 {
   _initial_rotation_pyramid_level = 4;
-  int num_pyr_levels = prev->getNumLevels();
+  int num_pyr_levels = prev.getNumLevels();
   int pyrLevel = MIN(num_pyr_levels-1,_initial_rotation_pyramid_level);
-  const PyramidLevel * ref_level = prev->getLevel(pyrLevel);
-  const PyramidLevel * target_level = cur->getLevel(pyrLevel);
+  const PyramidLevel::Ptr& ref_level = prev.getLevel(pyrLevel);
+  const PyramidLevel::Ptr& target_level = cur.getLevel(pyrLevel);
 
   InitialHomographyEstimator rotation_estimator;
   rotation_estimator.setTemplateImage(ref_level->getGrayscaleImage(),
@@ -225,9 +221,9 @@ VisualOdometry::processFrame(const uint8_t* gray, DepthSource* depth_source)
   if (_use_homography_initialization) {
     if (changed_reference_frames) {
       //TODO:this is ugly, but necessary due cuz of swapping stuff above :-/
-      init_rotation_est = estimateInitialRotation(_ref_frame, _cur_frame);
+      init_rotation_est = estimateInitialRotation(*_ref_frame, *_cur_frame);
     } else {
-      init_rotation_est = estimateInitialRotation(_prev_frame, _cur_frame);
+      init_rotation_est = estimateInitialRotation(*_prev_frame, *_cur_frame);
     }
   } else {
     init_rotation_est = Eigen::Quaterniond(1, 0, 0, 0); // identity quaternion.

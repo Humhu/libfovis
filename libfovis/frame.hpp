@@ -7,6 +7,7 @@
 #endif
 
 #include <vector>
+#include <memory>
 #include <Eigen/Geometry>
 
 #include "options.hpp"
@@ -33,6 +34,9 @@ class DepthSource;
 class OdometryFrame
 {
   public:
+
+    typedef std::shared_ptr<OdometryFrame> Ptr;
+
     OdometryFrame(const Rectification* rectification,
                   const VisualOdometryOptions& options);
 
@@ -60,11 +64,11 @@ class OdometryFrame
       return _num_levels;
     }
 
-    const PyramidLevel* getLevel(int i) const {
+    const PyramidLevel::Ptr& getLevel(int i) const {
       return _levels[i];
     }
 
-    PyramidLevel* getLevel(int i) {
+    PyramidLevel::Ptr& getLevel(int i) {
       return _levels[i];
     }
 
@@ -87,7 +91,7 @@ class OdometryFrame
     // note: the rectification pointer is 'borrowed'
     const Rectification* _rectification;
 
-    std::vector<PyramidLevel*> _levels;
+    std::vector<PyramidLevel::Ptr> _levels;
 };
 
 }

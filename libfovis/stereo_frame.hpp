@@ -39,7 +39,7 @@ class StereoFrame
       return result;
     }
 
-    PyramidLevel * getLevel(int level_num) { return _levels[level_num]; }
+    PyramidLevel::Ptr& getLevel(int level_num) { return _levels[level_num]; }
 
     void rectify(Eigen::Vector2d xy_in, Eigen::Vector2d * out) {
       _rectify_map->rectifyBilinearLookup(xy_in, out);
@@ -53,7 +53,7 @@ class StereoFrame
     int _feature_window_size;
 
     int _num_levels;
-    std::vector<PyramidLevel *> _levels;
+    std::vector<PyramidLevel::Ptr> _levels;
 
     Rectification* _rectify_map;
 

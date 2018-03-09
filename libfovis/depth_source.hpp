@@ -3,11 +3,12 @@
 
 #include <Eigen/Core>
 
+#include "feature_match.hpp"
+#include "frame.hpp"
+
 namespace fovis
 {
 
-class OdometryFrame;
-class FeatureMatch;
 
 /**
  * \ingroup FovisCore
@@ -40,15 +41,15 @@ class DepthSource
     /**
      * Populate keypoints in frame with XYZ data.
      */
-    virtual void getXyz(OdometryFrame * frame) = 0;
+    virtual void getXyz(OdometryFrame& frame) = 0;
 
     /**
      * Refine XYZ data of target keypoints in matches (usually after
      * subpixel refinement of the matches across time).
      */
-    virtual void refineXyz(FeatureMatch * matches,
+    virtual void refineXyz(FeatureMatch* matches,
                            int num_matches,
-                           OdometryFrame * frame) = 0;
+                           OdometryFrame& frame) = 0;
 
     /**
      * Return baseline of depth source, if applicable. If not applicable (e.g. for

@@ -2,6 +2,7 @@
 #define __fovis_motion_estimation_hpp__
 
 #include <stdint.h>
+#include <memory>
 
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
@@ -37,13 +38,16 @@ extern const char* MotionEstimateStatusCodeStrings[];
 class MotionEstimator
 {
   public:
+
+    typedef std::shared_ptr<MotionEstimator> Ptr;
+
     MotionEstimator(const Rectification* rectification, const VisualOdometryOptions& options);
     ~MotionEstimator();
 
 	void setOptions( const VisualOdometryOptions& options );
 
-    void estimateMotion(OdometryFrame* reference_frame,
-                        OdometryFrame* target_frame,
+    void estimateMotion(OdometryFrame::Ptr& reference_frame,
+                        OdometryFrame::Ptr& target_frame,
                         DepthSource* depth_source,
                         const Eigen::Isometry3d &init_motion_est,
                         const Eigen::MatrixXd &init_motion_cov);
@@ -87,7 +91,7 @@ class MotionEstimator
     void sanityCheck() const;
 
   private:
-    void matchFeatures(PyramidLevel* ref_level, PyramidLevel* target_level);
+    void matchFeatures(PyramidLevel& ref_level, PyramidLevel& target_level);
     void computeMaximallyConsistentClique();
     void estimateRigidBodyTransform();
     void refineMotionEstimate();
@@ -120,8 +124,8 @@ class MotionEstimator
 
     const Rectification* _rectification;
 
-    OdometryFrame* _ref_frame;
-    OdometryFrame* _target_frame;
+    OdometryFrame::Ptr _ref_frame;
+    OdometryFrame::Ptr _target_frame;
 
     // the motion estimate.
     // Can also be interpreted as the coordinate transformation to bring

@@ -77,22 +77,22 @@ bot_pgm_write_fname(const char *fname, const uint8_t * pixels,
 
 // sub-pixel refinement of feature matches, for more accurate depth
 // estimation.
-void refineFeatureMatch(PyramidLevel* ref_level,
-                        PyramidLevel* target_level,
+void refineFeatureMatch(PyramidLevel& ref_level,
+                        PyramidLevel& target_level,
                         Eigen::Vector2d ref_uv,
                         Eigen::Vector2d init_target_uv,
                         Eigen::Vector2d * final_target_uv,
                         float *delta_sse)
 {
   // get the reference descriptor
-  const uint8_t* ref_gray = ref_level->getGrayscaleImage();
-  int ref_gray_stride = ref_level->getGrayscaleImageStride();
+  const uint8_t* ref_gray = ref_level.getGrayscaleImage();
+  int ref_gray_stride = ref_level.getGrayscaleImageStride();
 
-  int desc_len = ref_level->getDescriptorLength();
-  int desc_stride = ref_level->getDescriptorStride();
+  int desc_len = ref_level.getDescriptorLength();
+  int desc_stride = ref_level.getDescriptorStride();
 
   uint8_t ref_descriptor[desc_stride] __attribute__ ((aligned (16)));
-  ref_level->populateDescriptorInterp(ref_uv.x(), ref_uv.y(), ref_descriptor);
+  ref_level.populateDescriptorInterp(ref_uv.x(), ref_uv.y(), ref_descriptor);
 
   int buf_num_bytes = round_up_to_multiple(desc_len * sizeof(int16_t), 16);
   int buf_num_elements = buf_num_bytes / sizeof(int16_t);
@@ -104,7 +104,7 @@ void refineFeatureMatch(PyramidLevel* ref_level,
 
   // initialize the target descriptor
   uint8_t orig_target_desc[desc_stride] __attribute__ ((aligned (16)));
-  target_level->populateDescriptorInterp(init_target_uv.x(), init_target_uv.y(),
+  target_level.populateDescriptorInterp(init_target_uv.x(), init_target_uv.y(),
                                          orig_target_desc);
   uint8_t tgt_desc[desc_stride] __attribute__ ((aligned (16)));
   memcpy(tgt_desc, orig_target_desc, desc_stride);
@@ -112,8 +112,8 @@ void refineFeatureMatch(PyramidLevel* ref_level,
   float tx = init_target_uv.x();
   float ty = init_target_uv.y();
 
-  const uint8_t* target_gray = target_level->getGrayscaleImage();
-  int tgt_gray_stride = target_level->getGrayscaleImageStride();
+  const uint8_t* target_gray = target_level.getGrayscaleImage();
+  int tgt_gray_stride = target_level.getGrayscaleImageStride();
 
   int16_t pix_errs[buf_num_elements] __attribute__ ((aligned (16)));
   memset(pix_errs + desc_len, 0, buf_num_pad_bytes);
@@ -137,12 +137,12 @@ void refineFeatureMatch(PyramidLevel* ref_level,
   memset(ref_desc_dx + desc_len, 0, buf_num_pad_bytes);
   memset(ref_desc_dy + desc_len, 0, buf_num_pad_bytes);
   int rdesc_offset = ref_uv.y() * ref_gray_stride + ref_uv.x();
-  const int* ref_desc_offsets = ref_level->getDescriptorIndexOffsets();
+  const int* ref_desc_offsets = ref_level.getDescriptorIndexOffsets();
   for (int i = 0; i < desc_len; i++) {
     int k = rdesc_offset + ref_desc_offsets[i];
     ref_desc_dx[i] = ref_gray[k + 1] - ref_gray[k];
     ref_desc_dy[i] = ref_gray[k + ref_gray_stride] - ref_gray[k];
-    assert(k + ref_gray_stride < ref_level->getHeight() * ref_gray_stride);
+    assert(k + ref_gray_stride < ref_level.getHeight() * ref_gray_stride);
   }
 
   int16_t Mx[buf_num_elements] __attribute__ ((aligned (16)));
@@ -151,7 +151,7 @@ void refineFeatureMatch(PyramidLevel* ref_level,
   memset(My + desc_len, 0, buf_num_pad_bytes);
 
   int max_iterations = 6;
-  const int* tgt_desc_offsets = target_level->getDescriptorIndexOffsets();
+  const int* tgt_desc_offsets = target_level.getDescriptorIndexOffsets();
   for (int iter_num = 0; iter_num < max_iterations; iter_num++) {
     // compute target image gradients at current position and
     // M = sum of Jacobians at reference and current positions
@@ -188,11 +188,11 @@ void refineFeatureMatch(PyramidLevel* ref_level,
     float next_ty = ty + delta_y;
 
     // stop if the keypoint is about to go out of bounds
-    if (!target_level->isLegalKeypointCoordinate(next_tx, next_ty))
+    if (!target_level.isLegalKeypointCoordinate(next_tx, next_ty))
       break;
 
     // compute shifted target descriptor and error
-    target_level->populateDescriptorInterp(next_tx, next_ty, tgt_desc);
+    target_level.populateDescriptorInterp(next_tx, next_ty, tgt_desc);
 
     for (int i = 0; i < desc_len; i++)
       pix_errs[i] = tgt_desc[i] - ref_descriptor[i];

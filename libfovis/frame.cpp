@@ -54,7 +54,7 @@ OdometryFrame::OdometryFrame(const Rectification* rectification,
     GridKeyPointFilter grid_filter(level_width, level_height, bucket_width,
                                    bucket_height, max_keypoints_per_bucket);
 
-    PyramidLevel* level = new PyramidLevel(level_width, level_height,
+    PyramidLevel::Ptr level = std::make_shared<PyramidLevel>(level_width, level_height,
                                            level_num, _feature_window_size,
                                            grid_filter);
     _levels.push_back(level);
@@ -63,8 +63,6 @@ OdometryFrame::OdometryFrame(const Rectification* rectification,
 
 OdometryFrame::~OdometryFrame()
 {
-  for (unsigned i=0; i<_levels.size(); i++)
-    delete _levels[i];
   _levels.clear();
   _num_levels = 0;
 }
@@ -76,7 +74,7 @@ OdometryFrame::prepareFrame(const uint8_t* raw_gray,
 {
   // copy raw image to first pyramid level
   assert(_num_levels);
-  PyramidLevel* first_level = _levels[0];
+  PyramidLevel::Ptr& first_level = _levels[0];
   int src_stride = _orig_width;
   for (int row=0; row<_orig_height; row++) {
     memcpy(first_level->_raw_gray + row * first_level->_raw_gray_stride,
@@ -91,11 +89,11 @@ OdometryFrame::prepareFrame(const uint8_t* raw_gray,
 
   // compute image pyramid and detect initial features
   for (int level_num=0; level_num<_num_levels; level_num++) {
-    PyramidLevel* level = _levels[level_num];
+    PyramidLevel::Ptr& level = _levels[level_num];
 
     if (level_num > 0) {
       // resize the image from the previous level
-      PyramidLevel* prev_level = _levels[level_num-1];
+      PyramidLevel::Ptr& prev_level = _levels[level_num-1];
       int prev_width = prev_level->getWidth();
       int prev_height = prev_level->getHeight();
       gauss_pyr_down_8u_C1R(prev_level->_raw_gray, prev_level->_raw_gray_stride,
@@ -106,7 +104,7 @@ OdometryFrame::prepareFrame(const uint8_t* raw_gray,
 
     level->_initial_keypoints.clear();
     FAST(level->_raw_gray, level->_width, level->_height, level->_raw_gray_stride,
-        &level->_initial_keypoints, fast_threshold, 1);
+        level->_initial_keypoints, fast_threshold, 1);
 
     // Keep track of this number before filtering out keyoints with the
     // grid bucketing, to use it as a signal for FAST threshold adjustment.
@@ -187,7 +185,7 @@ OdometryFrame::prepareFrame(const uint8_t* raw_gray,
 
   // populate 3D position for descriptors. Depth calculation may fail for some
   // of these keypoints.
-  depth_source->getXyz(this);
+  depth_source->getXyz(*this);
 
   // Get rid of keypoints with no depth.
   purgeBadKeypoints();
@@ -201,7 +199,7 @@ void
 OdometryFrame::purgeBadKeypoints() {
   tictoc("purge_bad_keypoints");
   for(int level_num=0; level_num<_num_levels; ++level_num) {
-    PyramidLevel* level = _levels[level_num];
+    PyramidLevel::Ptr& level = _levels[level_num];
     int desc_stride = level->getDescriptorStride();
     // Invariant: kp_data_end and descriptors_end point at end
     // of arrays with 'good' keypoints and descriptors respectively
@@ -238,7 +236,7 @@ OdometryFrame::sanityCheck() const
 {
 #ifndef NDEBUG
   for(int level_ind=0; level_ind<_num_levels; level_ind++) {
-    const PyramidLevel* level = _levels[level_ind];
+    const PyramidLevel::Ptr& level = _levels[level_ind];
     int num_keypoints = level->_num_keypoints;
     for(int f_ind=0; f_ind<num_keypoints; f_ind++) {
       const KeypointData& kp = level->_keypoints[f_ind];

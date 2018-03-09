@@ -2,6 +2,7 @@
 #define __fovis_keypoint_hpp__
 
 #include <inttypes.h>
+#include <memory>
 
 #include <Eigen/Core>
 
@@ -14,6 +15,8 @@ namespace fovis
 class KeyPoint
 {
   public:
+    typedef std::shared_ptr<KeyPoint> Ptr;
+
     /**
      * also known as the X coordinate.
      */

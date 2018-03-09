@@ -6050,7 +6050,7 @@ static void fastNonmaxSuppression(const vector<Point>& corners,
 }
 
 void FAST(const uint8_t* image, int width, int height, int row_stride,
-        vector<KeyPoint>* keypoints, int threshold, bool nonmax_suppression )
+        vector<KeyPoint>& keypoints, int threshold, bool nonmax_suppression )
 {
     vector<Point> corners;
     fast9Detect(image, width, height, row_stride, corners, threshold);
@@ -6059,14 +6059,14 @@ void FAST(const uint8_t* image, int width, int height, int row_stride,
     {
         vector<int> scores;
         fast9ComputeScores(image, width, height, row_stride, corners, scores, threshold);
-        fastNonmaxSuppression(corners, scores, *keypoints);
+        fastNonmaxSuppression(corners, scores, keypoints);
     }
     else
     {
         size_t i, n = corners.size();
-        keypoints->resize(n);
+        keypoints.resize(n);
         for( i = 0; i < n; i++ )
-            (*keypoints)[i] = KeyPoint(corners[i].x, corners[i].y, 0);
+            keypoints[i] = KeyPoint(corners[i].x, corners[i].y, 0);
     }
 }
 

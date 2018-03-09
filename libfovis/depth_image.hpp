@@ -31,10 +31,10 @@ class DepthImage : public DepthSource
     void setDepthImage(const float* depth_data);
 
     virtual bool haveXyz(int u, int v) ;
-    virtual void getXyz(OdometryFrame * frame);
-    virtual void refineXyz(FeatureMatch * matches,
+    virtual void getXyz(OdometryFrame& frame);
+    virtual void refineXyz(FeatureMatch* matches,
                            int num_matches,
-                           OdometryFrame * frame);
+                           OdometryFrame& frame);
 
     virtual double getBaseline() const { return 0; }
 
@@ -42,7 +42,7 @@ class DepthImage : public DepthSource
     int rgbToDepthIndex(double u, double v) const {
       return (int)(v * _y_scale) * _depth_width + (int)(u * _x_scale);
     }
-    bool getXyzInterp(KeypointData* kpdata);
+    bool getXyzInterp(KeypointData& kpdata);
 
     int _rgb_width;
     int _rgb_height;
